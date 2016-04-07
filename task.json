@@ -1,0 +1,83 @@
+{
+  "id": "e927ed99-f19e-4c55-9e87-ccf0409b4689",
+  "name": "gitMerge",
+  "friendlyName": "Git Merge",
+  "description": "Test merges and optionally commit",
+  "author": "Microsoft",
+  "helpMarkDown": "",
+  "category": "Build",
+  "visibility": [
+    "Build"
+  ],
+  "demands": [],
+  "version": {
+    "Major": "0",
+    "Minor": "0",
+    "Patch": "27"
+  },
+  "minimumAgentVersion": "1.91.0",
+  "instanceNameFormat": "Git Merge",
+  "groups": [
+    {
+      "name": "advanced",
+      "displayName": "Advanced",
+      "isExpanded": false
+    }
+  ],
+  "inputs": [
+    {
+      "name": "mergeType",
+      "type": "pickList",
+      "label": "Operation Type",
+      "required": true,
+      "helpMarkDown": "Either Test Merge or Merge",
+      "defaultValue": "test",
+      "options": {
+          "test": "Test Merge (no commit)",
+          "merge": "Merge (with commit and push)"
+      } 
+    },
+    {
+      "name": "branchesToTest",
+      "type": "string",
+      "label": "Branch(es) to Test Merge",
+      "defaultValue": "",
+      "required": true,
+      "helpMarkDown": "Branch(es) to test merge into this build's repo branch (set in the Repository settings). Comma separate if there are multiple.",
+      "visibleRule": "mergeType = test"  
+    },
+    {
+      "name": "testMergeAll",
+      "type": "boolean",
+      "label": "Test merging all branches",
+      "defaultValue": "false",
+      "required": true,
+      "helpMarkDown": "If checked, the test will try to merge all branches. If unchecked, branches will be tested independently.",
+      "visibleRule": "mergeType = test"
+    },
+    {
+      "name": "branchToMergeInto",
+      "type": "string",
+      "label": "Branch to merge into",
+      "defaultValue": "master",
+      "required": true,
+      "helpMarkDown": "Branch to Merge into from this build's repo branch (set in the Repository settings).",
+      "visibleRule": "mergeType = merge"  
+    },
+    {
+      "name": "remoteName",
+      "type": "string",
+      "label": "Name of this remote",
+      "defaultValue": "origin",
+      "required": true,
+      "helpMarkDown": "Name of this remote in the Git repo.",
+      "groupName": "advanced"
+    }
+  ],
+  "execution": {
+    "Node": {
+      "target": "merge.js",
+      "argumentFormat": ""
+    }
+  }
+}

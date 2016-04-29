@@ -1,4 +1,5 @@
 var tl = require('vso-task-lib/vsotask');
+var fs = require('fs');
 function execGit(gitArgs) {
     var gitTool = tl.createToolRunner(tl.which("git", true));
     var opts = {
@@ -8,6 +9,31 @@ function execGit(gitArgs) {
     return gitTool.execSync(opts);
 }
 exports.execGit = execGit;
+function cloneRepo(repoUrl, pat) {
+    if (pat === void 0) { pat = ""; }
+    var url = repoUrl;
+    if (!isEmpty(pat)) {
+        var idx = url.indexOf("//") + 2;
+        url = [repoUrl.slice(0, idx), ("pat:" + pat + "@"), repoUrl.slice(idx)].join('');
+    }
+    var res = execGit(["clone", url]);
+    if (res.code !== 0) {
+        tl.error("Could not clone " + repoUrl);
+        return false;
+    }
+    return true;
+}
+exports.cloneRepo = cloneRepo;
+function checkoutBranch(branch) {
+    tl.debug("Checkout " + branch);
+    var res = execGit(["checkout", branch]);
+    if (res.code !== 0) {
+        tl.error("Could not checkout " + branch);
+        return false;
+    }
+    return true;
+}
+exports.checkoutBranch = checkoutBranch;
 function checkoutCommit(commitId) {
     tl.debug("Checking out commit " + commitId);
     var res = execGit(["checkout", commitId]);
@@ -102,3 +128,14 @@ function pullBranch(remoteName, branch, commitId) {
     return true;
 }
 exports.pullBranch = pullBranch;
+function isEmpty(s) {
+    return typeof s === "undefined" || s === null || s === "";
+}
+exports.isEmpty = isEmpty;
+function findSubdirs(path) {
+    return fs.readdirSync(path).filter(function (d, i, a) {
+        var subDir = path + "/" + d;
+        return fs.statSync(subDir).isDirectory();
+    });
+}
+exports.findSubdirs = findSubdirs;

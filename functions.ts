@@ -1,5 +1,6 @@
 import * as tl from 'vso-task-lib/vsotask';
 import * as tr from 'vso-task-lib/toolrunner';
+import * as fs from 'fs';
 
 export function execGit(gitArgs: string[]): tr.IExecResult {
     var gitTool = tl.createToolRunner(tl.which("git", true));
@@ -11,6 +12,30 @@ export function execGit(gitArgs: string[]): tr.IExecResult {
     return gitTool.execSync(opts);
 }
 
+export function cloneRepo(repoUrl: string, pat: string = ""): boolean {
+    var url = repoUrl;
+    if (!isEmpty(pat)) {
+        var idx = url.indexOf("//") + 2;
+        url = [repoUrl.slice(0, idx), `pat:${pat}@`, repoUrl.slice(idx)].join('');
+    }
+    var res = execGit(["clone", url]);
+    if (res.code !== 0) {
+        tl.error(`Could not clone ${repoUrl}`);
+        return false;
+    }
+    return true;
+}
+
+export function checkoutBranch(branch: string): boolean {
+    tl.debug(`Checkout ${branch}`);
+    
+    var res = execGit(["checkout", branch]);
+    if (res.code !== 0) {
+        tl.error(`Could not checkout ${branch}`);
+        return false;
+    }
+    return true;
+}
 
 export function checkoutCommit(commitId: string): boolean {
     tl.debug(`Checking out commit ${commitId}`);
@@ -108,4 +133,15 @@ export function pullBranch(remoteName: string, branch: string, commitId?: string
         return execGit(["reset", "--hard", remoteBranch]).code === 0;
     }
     return true;
+}
+
+export function isEmpty(s: string): boolean {
+    return typeof s === "undefined" || s === null || s === "";
+}
+
+export function findSubdirs(path: string): string[] {
+    return fs.readdirSync(path).filter((d, i, a) => {
+        var subDir = `${path}/${d}`;
+        return fs.statSync(subDir).isDirectory();
+    });
 }

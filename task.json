@@ -5,15 +5,16 @@
   "description": "Test merges and optionally commit",
   "author": "Microsoft",
   "helpMarkDown": "",
-  "category": "Build",
+  "category": "Utility",
   "visibility": [
-    "Build"
+    "Build",
+    "Release"
   ],
   "demands": [],
   "version": {
     "Major": "0",
     "Minor": "0",
-    "Patch": "27"
+    "Patch": "41"
   },
   "minimumAgentVersion": "1.91.0",
   "instanceNameFormat": "Git Merge",
@@ -44,7 +45,7 @@
       "defaultValue": "",
       "required": true,
       "helpMarkDown": "Branch(es) to test merge into this build's repo branch (set in the Repository settings). Comma separate if there are multiple.",
-      "visibleRule": "mergeType = test"  
+      "visibleRule": "mergeType = test"
     },
     {
       "name": "testMergeAll",
@@ -56,13 +57,21 @@
       "visibleRule": "mergeType = test"
     },
     {
-      "name": "branchToMergeInto",
+      "name": "targetBranch",
       "type": "string",
-      "label": "Branch to merge into",
+      "label": "Target Branch",
       "defaultValue": "master",
       "required": true,
-      "helpMarkDown": "Branch to Merge into from this build's repo branch (set in the Repository settings).",
-      "visibleRule": "mergeType = merge"  
+      "helpMarkDown": "The branch to merge the build branch into.",
+      "visibleRule": "mergeType = merge"
+    },
+    {
+      "name": "sourceCommitId",
+      "type": "string",
+      "label": "Commit Id",
+      "required": false,
+      "helpMarkDown": "Commit id of the source branch. If not specified, the build's commit id will be used",
+      "visibleRule": "mergeType = merge"
     },
     {
       "name": "remoteName",
@@ -71,6 +80,24 @@
       "defaultValue": "origin",
       "required": true,
       "helpMarkDown": "Name of this remote in the Git repo.",
+      "groupName": "advanced"
+    },
+    {
+      "name": "repoUrl",
+      "type": "string",
+      "label": "URL of the repo",
+      "defaultValue": "",
+      "required": false,
+      "helpMarkDown": "URL of the repo. Only required if this task is used in a Release (not required in Builds).",
+      "groupName": "advanced"
+    },
+    {
+      "name": "pat",
+      "type": "string",
+      "label": "PAT",
+      "defaultValue": "",
+      "required": false,
+      "helpMarkDown": "Personal Access Token for repo access. Only required if this task is used in a Release (not required in Builds).",
       "groupName": "advanced"
     }
   ],

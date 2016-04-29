@@ -4,21 +4,65 @@ tl.debug("Starting 'Git Merge' task");
 // get the task vars
 var mergeType = tl.getInput("mergeType", true);
 var branchesToMergeStr = tl.getInput("branchesToTest", false);
-var branchToMergeInto = tl.getInput("branchToMergeInto", false);
 var testMergeAll = tl.getBoolInput("testMergeAll", true);
+var targetBranch = tl.getInput("targetBranch", true);
+var sourceCommitId = tl.getInput("sourceCommitId", false);
 var remoteName = tl.getInput("remoteName", true);
-var buildSourceBranch = tl.getVariable("Build.SourceBranch");
-var commitId = tl.getVariable("Build.SourceVersion");
+// ===================================================================================================
+// TODO: repoUrl could actually be determined as follows:
+// var tfsUri = tl.getVariable("System.TeamFoundationServerURI");
+// var tfsProject = tl.getVariable("System.TeamProject");
+// var repoName = tl.getVariable("Build.RepositoryName");
+// var repoUrl = `${tfsUri}/${tfsProject}/${repoName}`;
+// unfortunately, the repo name isn't correct in the release vars, so the user must pass it in for now
+// also, if the user uses a Github repo, we may want to leave the option to specify the url and PAT?
+// ===================================================================================================
+var repoUrl = tl.getInput("repoUrl", false);
+var pat = tl.getInput("pat", false);
+// get build vars
+var sourceBranch = tl.getVariable("Build.SourceBranchName");
+var buildSourceCommitId = tl.getVariable("Build.SourceVersion");
 tl.debug("mergeType: " + mergeType);
 tl.debug("branchesToMerge: " + branchesToMergeStr);
-tl.debug("branchToMergeInto: " + branchToMergeInto);
+tl.debug("targetBranch: " + targetBranch);
 tl.debug("testMergeAll: " + testMergeAll);
+tl.debug("sourceCommitId: " + sourceCommitId);
 tl.debug("remoteName: " + remoteName);
-tl.debug("buildSourceBranch: " + buildSourceBranch);
-tl.debug("commitId: " + commitId);
-tl.cd(tl.getVariable("Build.SourcesDirectory"));
+tl.debug("sourceBranch: " + sourceBranch);
+tl.debug("buildSourceCommitId: " + buildSourceCommitId);
+tl.debug("repoUrl: " + repoUrl);
+if (ut.isEmpty(pat)) {
+    tl.debug("No PAT was provided");
+}
+else {
+    tl.debug("A PAT was provided");
+}
+if (ut.isEmpty(sourceCommitId)) {
+    tl.debug("Using buid source commit id " + buildSourceCommitId + " as the commit id");
+    sourceCommitId = buildSourceCommitId;
+}
+var sourceDir = tl.getVariable("Build.SourcesDirectory");
+if (ut.isEmpty(sourceDir)) {
+    // cd to the agent release dir
+    var sourceDir = tl.getVariable("Agent.ReleaseDirectory");
+    tl.cd(sourceDir);
+    // create a new dir for the source
+    tl.mkdirP("__s");
+    tl.cd("__s");
+    if (!ut.cloneRepo(repoUrl, pat)) {
+        tl.exit(1);
+    }
+    // cd to the repo directory
+    tl.cd(ut.findSubdirs(process.cwd())[0]);
+    tl.debug("Working dir: " + process.cwd());
+}
+else {
+    tl.cd(sourceDir);
+}
 // fetch the remote branches
-var res = ut.execGit(["fetch", remoteName]);
+if (!ut.execGit(["fetch", remoteName])) {
+    tl.exit(1);
+}
 if (mergeType === "test") {
     var branchesToMerge = branchesToMergeStr.split(',');
     console.info("Found " + branchesToMerge.length + " branches to test");
@@ -28,7 +72,7 @@ if (mergeType === "test") {
     for (var i = 0; i < branchesToMerge.length; i++) {
         var branch = branchesToMerge[i].trim();
         // make sure the branch exists locally
-        if (!ut.pullBranch(remoteName, branch, commitId)) {
+        if (!ut.pullBranch(remoteName, branch, sourceCommitId)) {
             errors++;
             continue;
         }
@@ -38,7 +82,7 @@ if (mergeType === "test") {
         tl.exit(1);
     }
     // make sure that we're on the repo commit before continuing
-    if (!ut.checkoutCommit(commitId)) {
+    if (!ut.checkoutCommit(sourceCommitId)) {
         tl.exit(1);
     }
     // now that all the branches are local, test the merges
@@ -66,27 +110,42 @@ if (mergeType === "test") {
         }
     }
     // clean up
-    ut.checkoutCommit(commitId);
+    ut.checkoutCommit(sourceCommitId);
     // fail the task if there were errors
     if (errors > 0) {
         tl.exit(1);
     }
 }
 else {
-    tl.debug("Checking out " + branchToMergeInto);
-    if (!ut.pullBranch(remoteName, branchToMergeInto)) {
+    // pull the source and target branches
+    if (!ut.pullBranch(remoteName, sourceBranch) || !ut.pullBranch(remoteName, targetBranch)) {
         tl.exit(1);
     }
-    var buildNo = tl.getVariable("Build.BuildNumber");
-    var buildName = tl.getVariable("Build.DefinitionName");
-    var build = buildName + "-" + buildNo;
-    tl.debug("Merging commit " + commitId);
-    if (ut.mergeCommit(commitId, "Merging in build " + build)) {
-        if (!ut.push(remoteName, branchToMergeInto)) {
+    // checkout the targetBranch
+    if (!ut.checkoutBranch(targetBranch)) {
+        tl.exit(1);
+    }
+    // build a message to point to build or release
+    var identifier = "build or release";
+    var releaseDefName = tl.getVariable("Release.DefinitionName");
+    if (ut.isEmpty(releaseDefName)) {
+        var releaseName = tl.getVariable("Release.ReleaseName");
+        identifier = "release " + releaseDefName + " (" + releaseName + ")";
+    }
+    else {
+        var buildName = tl.getVariable("Build.DefinitionName");
+        var buildNo = tl.getVariable("Build.BuildNumber");
+        var identifier = "build " + buildName + " (" + buildNo + ")";
+    }
+    var commitMessage = "Merging in " + identifier;
+    // merge in the commit id and push
+    if (ut.mergeCommit(sourceCommitId, commitMessage)) {
+        if (!ut.push(remoteName, targetBranch)) {
             tl.exit(1);
         }
     }
     else {
+        tl.error("Could not merge " + sourceCommitId + " into " + targetBranch + ". Possibley a merge conflict?");
         ut.resetHead();
         tl.exit(1);
     }

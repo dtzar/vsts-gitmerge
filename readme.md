@@ -2,7 +2,7 @@
 
 ## Overview
 This task allows you to test merges of branches, failing the build if branches cannot be automatically merged. You can also commit
-a merges from a branch into another branch.
+a merges from a branch into another branch.  Please [follow these instructions](./install.md) to install the task to your VSTS subscription.
 
 ## Modes
 The task operates in 1 of 2 modes:

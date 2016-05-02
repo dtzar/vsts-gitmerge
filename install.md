@@ -7,7 +7,7 @@
   <br> From the root of this repo simply execute: 
   <br> `npm install`
 
-1. Upload the task to your repository
+1. Upload the task to your VSTS account
   <br> From the root of this repository, execute: 
   <br> `tfx build tasks upload --task-path .\` 
   <br> You should see a message which states that the task uploaded successfully.

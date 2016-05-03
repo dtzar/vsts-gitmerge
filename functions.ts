@@ -13,17 +13,22 @@ export function execGit(gitArgs: string[]): tr.IExecResult {
 }
 
 export function cloneRepo(repoUrl: string, pat: string = ""): boolean {
-    var url = repoUrl;
-    if (!isEmpty(pat)) {
-        var idx = url.indexOf("//") + 2;
-        url = [repoUrl.slice(0, idx), `pat:${pat}@`, repoUrl.slice(idx)].join('');
-    }
+    var url = getUrlWithToken(repoUrl, pat);
     var res = execGit(["clone", url]);
     if (res.code !== 0) {
         tl.error(`Could not clone ${repoUrl}`);
         return false;
     }
     return true;
+}
+
+function getUrlWithToken(repoUrl: string, pat: string): string {
+    var url = repoUrl;
+    if (!isEmpty(pat)) {
+        var idx = url.indexOf("//") + 2;
+        url = [repoUrl.slice(0, idx), `pat:${pat}@`, repoUrl.slice(idx)].join('');
+    }
+    return url;
 }
 
 export function checkoutBranch(branch: string): boolean {
@@ -133,6 +138,13 @@ export function pullBranch(remoteName: string, branch: string, commitId?: string
         return execGit(["reset", "--hard", remoteBranch]).code === 0;
     }
     return true;
+}
+
+export function setRemote(repoUrl: string, token: string, remoteName: string): boolean {
+    tl.debug(`Setting remote ${remoteName} for repo ${repoUrl}`);
+    var url = getUrlWithToken(repoUrl, token);
+    
+    return execGit(["remote", "set-url", remoteName, url]).code === 0;
 }
 
 export function isEmpty(s: string): boolean {

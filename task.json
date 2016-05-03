@@ -14,7 +14,7 @@
   "version": {
     "Major": "0",
     "Minor": "0",
-    "Patch": "41"
+    "Patch": "46"
   },
   "minimumAgentVersion": "1.91.0",
   "instanceNameFormat": "Git Merge",
@@ -74,6 +74,14 @@
       "visibleRule": "mergeType = merge"
     },
     {
+      "name": "repoUrl",
+      "type": "string",
+      "label": "URL of the repo",
+      "defaultValue": "",
+      "required": true,
+      "helpMarkDown": "URL of the repo."
+    },
+    {
       "name": "remoteName",
       "type": "string",
       "label": "Name of this remote",
@@ -83,21 +91,12 @@
       "groupName": "advanced"
     },
     {
-      "name": "repoUrl",
-      "type": "string",
-      "label": "URL of the repo",
-      "defaultValue": "",
-      "required": false,
-      "helpMarkDown": "URL of the repo. Only required if this task is used in a Release (not required in Builds).",
-      "groupName": "advanced"
-    },
-    {
       "name": "pat",
       "type": "string",
       "label": "PAT",
       "defaultValue": "",
       "required": false,
-      "helpMarkDown": "Personal Access Token for repo access. Only required if this task is used in a Release (not required in Builds).",
+      "helpMarkDown": "Personal Access Token for repo access. Only required if this task is used in a Release (not required in Builds). For builds, enable OAuth token.",
       "groupName": "advanced"
     }
   ],

@@ -17,12 +17,11 @@ var remoteName = tl.getInput("remoteName", true);
 // unfortunately, the repo name isn't correct in the release vars, so the user must pass it in for now
 // also, if the user uses a Github repo, we may want to leave the option to specify the url and PAT?
 // ===================================================================================================
-var repoUrl = tl.getInput("repoUrl", true);
+var repoUrl = tl.getInput("repoUrl", false);
 var pat = tl.getInput("pat", false);
 // get build vars
 var sourceBranch = tl.getVariable("Build.SourceBranchName");
 var buildSourceCommitId = tl.getVariable("Build.SourceVersion");
-var token = tl.getVariable('System.AccessToken');
 tl.debug("mergeType: " + mergeType);
 tl.debug("branchesToMerge: " + branchesToMergeStr);
 tl.debug("targetBranch: " + targetBranch);
@@ -37,12 +36,6 @@ if (ut.isEmpty(pat)) {
 }
 else {
     tl.debug("A PAT was provided");
-}
-if (ut.isEmpty(token)) {
-    tl.debug("The system Oauth token is NOT present");
-}
-else {
-    tl.debug("The system Oauth token is present");
 }
 if (ut.isEmpty(sourceCommitId)) {
     tl.debug("Using buid source commit id " + buildSourceCommitId + " as the commit id");
@@ -65,16 +58,9 @@ if (ut.isEmpty(sourceDir)) {
 }
 else {
     tl.cd(sourceDir);
-    // set the remote creds using the token
-    if (ut.isEmpty(token)) {
-        tl.warning("Could not find System.AccessToken. Attempting to continue - if credentials fail, then please enable the token in the build Options page.");
-    }
-    else {
-        ut.setRemote(repoUrl, token, remoteName);
-    }
 }
 // fetch the remote branches
-if (ut.execGit(["fetch", remoteName]).code !== 0) {
+if (!ut.execGit(["fetch", remoteName])) {
     tl.exit(1);
 }
 if (mergeType === "test") {

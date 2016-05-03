@@ -11,7 +11,11 @@ function execGit(gitArgs) {
 exports.execGit = execGit;
 function cloneRepo(repoUrl, pat) {
     if (pat === void 0) { pat = ""; }
-    var url = getUrlWithToken(repoUrl, pat);
+    var url = repoUrl;
+    if (!isEmpty(pat)) {
+        var idx = url.indexOf("//") + 2;
+        url = [repoUrl.slice(0, idx), ("pat:" + pat + "@"), repoUrl.slice(idx)].join('');
+    }
     var res = execGit(["clone", url]);
     if (res.code !== 0) {
         tl.error("Could not clone " + repoUrl);
@@ -20,14 +24,6 @@ function cloneRepo(repoUrl, pat) {
     return true;
 }
 exports.cloneRepo = cloneRepo;
-function getUrlWithToken(repoUrl, pat) {
-    var url = repoUrl;
-    if (!isEmpty(pat)) {
-        var idx = url.indexOf("//") + 2;
-        url = [repoUrl.slice(0, idx), ("pat:" + pat + "@"), repoUrl.slice(idx)].join('');
-    }
-    return url;
-}
 function checkoutBranch(branch) {
     tl.debug("Checkout " + branch);
     var res = execGit(["checkout", branch]);
@@ -132,12 +128,6 @@ function pullBranch(remoteName, branch, commitId) {
     return true;
 }
 exports.pullBranch = pullBranch;
-function setRemote(repoUrl, token, remoteName) {
-    tl.debug("Setting remote " + remoteName + " for repo " + repoUrl);
-    var url = getUrlWithToken(repoUrl, token);
-    return execGit(["remote", "set-url", remoteName, url]).code === 0;
-}
-exports.setRemote = setRemote;
 function isEmpty(s) {
     return typeof s === "undefined" || s === null || s === "";
 }

@@ -6,7 +6,16 @@ function execGit(gitArgs) {
         failOnStdErr: true
     };
     gitTool.arg(gitArgs);
-    return gitTool.execSync(opts);
+    var res = gitTool.execSync(opts);
+    if (res.code !== 0) {
+        if (!isEmpty(res.stderr)) {
+            tl.error(res.stderr);
+        }
+        if (typeof res.error !== 'undefined' && typeof res.error.message !== 'undefined' && !isEmpty(res.error.message)) {
+            tl.error(res.error.message);
+        }
+    }
+    return res;
 }
 exports.execGit = execGit;
 function cloneRepo(repoUrl, pat) {
@@ -76,11 +85,11 @@ function merge(branch, commit) {
     }
     gitArgs.push(branch);
     var res = execGit(gitArgs);
-    if (res.code !== 0 && !commit) {
+    // abort the merge, but only if not up-to-date, or we're not committing or it failed
+    if (res.code !== 0 && !commit && res.stdout.indexOf('Already up-to-date') < 0) {
         abortMerge();
-        return false;
     }
-    return res.code === 0;
+    return res;
 }
 exports.merge = merge;
 function abortMerge() {

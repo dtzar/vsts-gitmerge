@@ -9,7 +9,16 @@ export function execGit(gitArgs: string[]): tr.IExecResult {
     };
     
     gitTool.arg(gitArgs);
-    return gitTool.execSync(opts);
+    var res = gitTool.execSync(opts);
+    if (res.code !== 0) {
+        if (!isEmpty(res.stderr)) {
+            tl.error(res.stderr);
+        }
+        if (typeof res.error !== 'undefined' && typeof res.error.message !== 'undefined' && !isEmpty(res.error.message)) {
+            tl.error(res.error.message);
+        }
+    }
+    return res;
 }
 
 export function cloneRepo(repoUrl: string, pat: string = ""): boolean {
@@ -73,7 +82,7 @@ export function mergeCommit(commitId: string, message?: string): boolean {
     return execGit(gitArgs).code === 0;
 }
 
-export function merge(branch: string, commit = false): boolean {
+export function merge(branch: string, commit = false): tr.IExecResult {
     tl.debug(`Merging ${branch} with commit = ${commit}`);
     
     var gitArgs = ["merge"];
@@ -83,11 +92,11 @@ export function merge(branch: string, commit = false): boolean {
     gitArgs.push(branch);
     
     var res = execGit(gitArgs);
-    if (res.code !== 0 && !commit) {
+    // abort the merge, but only if not up-to-date, or we're not committing or it failed
+    if (res.code !== 0 && !commit && res.stdout.indexOf('Already up-to-date') < 0) {
         abortMerge();
-        return false;
     }
-    return res.code === 0;
+    return res;
 }
 
 export function abortMerge() {

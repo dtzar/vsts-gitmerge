@@ -115,7 +115,8 @@ if (mergeType === "test") {
     for (var i = 0; i < branchesToMerge.length; i++) {
         var branch = branchesToMerge[i].trim();
         
-        if (ut.merge(branch, false)) {
+        var mergeRes = ut.merge(branch, false);
+        if (mergeRes.code === 0) {
             console.info(`No merge conflicts detected when merging ${branch}`);
             
             if (testMergeAll) {
@@ -127,7 +128,9 @@ if (mergeType === "test") {
                     break;
                 }
             } else {
-                ut.abortMerge();
+                if (mergeRes.stdout.indexOf('Already up-to-date') < 0) {
+                    ut.abortMerge();
+                }
             }
         } else {
             errors++;

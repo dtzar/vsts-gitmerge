@@ -11,6 +11,7 @@
   <br> From the root of this repository, execute: 
   <br> `tfx build tasks upload --task-path .\` 
   <br> You should see a message which states that the task uploaded successfully.
+> Note: You have to be a member of the Team Foundation Administrators in order to upload the task.
 
 Now you can see the "Git Merge" utility task available to add via build or release.
 > Note: If you are updating the task code, you will need to remove old tasks and recreate the tasks again.

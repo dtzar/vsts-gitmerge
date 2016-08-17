@@ -2,6 +2,7 @@
 
 1. Install the [tfx-cli tool](https://github.com/Microsoft/tfs-cli)
 >  Note: When you login, make sure to use the https://youraccount.visualstudio.com/DefaultCollection URL
+>  Note: You have to be a member of the Team Foundation Administrators in order to upload the task.
 
 1. Install this vsts task dependencies
   <br> From the root of this repo simply execute: 

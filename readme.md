@@ -22,3 +22,4 @@ When queuing the build, you can specify a commit Id if you want to merge an olde
 
 ## Advanced Settings
 1. **Name of this remote**: Name of the remote in VSTS (or TFS). Defaults to `origin`.
+2. **PAT**: Your personal access token must be set here if you are using this task in a "Release" workflow.

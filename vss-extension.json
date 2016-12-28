@@ -2,7 +2,7 @@
     "manifestVersion": 1,
     "id": "git-merge",
     "name": "Git Merge",
-    "version": "0.0.3",
+    "version": "0.0.60",
     "publisher": "dtzar",
     "targets": [
         {
@@ -13,8 +13,16 @@
     "categories": [
         "Build and release"
     ],
+    "tags": [
+        "git", "merge",
+        "versioning",
+        "utility task",
+        "Build task",
+        "Deploy task",
+        "branches"
+    ],
     "icons": {
-        "default": "icon.png"        
+        "default": "GitMerge/icon.png"        
     },
     "files": [
         {

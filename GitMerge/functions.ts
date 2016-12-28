@@ -1,5 +1,5 @@
-import * as tl from 'vso-task-lib/vsotask';
-import * as tr from 'vso-task-lib/toolrunner';
+import * as tl from 'vsts-task-lib/task';
+import * as tr from 'vsts-task-lib/toolrunner';
 import * as fs from 'fs';
 
 export function execGit(gitArgs: string[]): tr.IExecResult {

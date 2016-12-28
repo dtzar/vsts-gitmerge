@@ -1,5 +1,5 @@
 {
-  "name": "git-merge",
+  "name": "dtzar.git-merge",
   "version": "0.0.59",
   "description": "Test and Perform merges of branches",
   "scripts": {

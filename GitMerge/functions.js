@@ -1,4 +1,4 @@
-var tl = require('vso-task-lib/vsotask');
+var tl = require('vsts-task-lib/task');
 var fs = require('fs');
 function execGit(gitArgs) {
     var gitTool = tl.createToolRunner(tl.which("git", true));

@@ -1,18 +1,18 @@
 # Git Merge Task
 
 ## Overview
-This task allows you to test merges of branches, failing the build if branches cannot be automatically merged. You can also commit
-a merges from a branch into another branch.  Please [follow these instructions](./install.md) to install the task to your VSTS subscription.
+This [VSTS/TFS marketplace task](https://marketplace.visualstudio.com/items?itemName=dtzar.git-merge) does a test merge or actual merge and push of vsts-based git branches in the build or release areas.
 
 ## Modes
 The task operates in 1 of 2 modes:
-- **Test Merge** which tests if branches can be merged, but never commits
-- **Merge** which commits and pushes a merge
+- **Test Merge** - tests if branches can be merged, but never commits <br>
+The specified branches will attempt to merge only local to the build agent and if the branches cannot be automatically merged (i.e. merge conflicts) then the task will fail.  Otherwise the task passes without committing any merges.
+- **Merge** - which commits and pushes a merge between two branches.
 
 ### Test Merge Mode
 When running in Test Merge Mode, you must set the repository of the build (in the Repository tab) to the "target" repo. Then specify:
 - **Branch(es) to Test Merge** - this is a comma-separated list of branches you want to test merging into the "target" repo
-- **Test merging all branches** - check this to test merging all the branches sequentially. If cleared, each branch will be tested independently.
+- **Test merging all branches** - check this to test merging all the branches sequentially. If cleared, each branch will be tested independently against the branch to merge into.
 
 ### Merge Mode
 When running in Merge Mode, you must set the repository of the build (in the Repository tab) to the branch you want to merge. Then specify:

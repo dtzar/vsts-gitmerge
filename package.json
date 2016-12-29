@@ -1,6 +1,6 @@
 {
   "name": "git-merge",
-  "version": "0.0.59",
+  "version": "0.0.65",
   "description": "Test and Perform merges of branches",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

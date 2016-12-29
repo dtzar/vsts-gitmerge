@@ -1,24 +1,31 @@
+import Q = require('q');
 import * as tl from 'vsts-task-lib/task';
 import * as tr from 'vsts-task-lib/toolrunner';
 import * as fs from 'fs';
 
-export function execGit(gitArgs: string[]): tr.IExecResult {
-    var gitTool = tl.createToolRunner(tl.which("git", true));
-    var opts: tr.IExecOptions = {
-        failOnStdErr: true
-    };
+export async function execGit(gitArgs: string[]) : Promise<number> {
+    var gitTool = tl.tool(tl.which("git",true));
+    if (!gitTool) {
+        throw new Error(tl.loc('Git not found'));
+    }
     
     gitTool.arg(gitArgs);
-    var res = gitTool.execSync(opts);
-    if (res.code !== 0) {
-        if (!isEmpty(res.stderr)) {
-            tl.error(res.stderr);
-        }
-        if (typeof res.error !== 'undefined' && typeof res.error.message !== 'undefined' && !isEmpty(res.error.message)) {
-            tl.error(res.error.message);
-        }
+    try {
+        var res : number = await gitTool.exec();
+        /** if (res.code !== 0) {
+            if (!isEmpty(res.stderr)) {
+                tl.error(res.stderr);
+            }
+            if (typeof res.error !== 'undefined' && typeof res.error.message !== 'undefined' && !isEmpty(res.error.message)) {
+                tl.error(res.error.message);
+            }
+        **/
     }
-    return res;
+    catch (err) {
+        tl.debug('execGit failed');
+        tl.setResult(tl.TaskResult.Failed, tl.loc('GitFailed', err.message));
+    }
+    return Q(res);
 }
 
 export function cloneRepo(repoUrl: string, pat: string = ""): boolean {

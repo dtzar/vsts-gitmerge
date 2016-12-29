@@ -14,7 +14,7 @@
   "version": {
     "Major": "0",
     "Minor": "0",
-    "Patch": "59"
+    "Patch": "65"
   },
   "minimumAgentVersion": "1.91.0",
   "instanceNameFormat": "Git Merge",

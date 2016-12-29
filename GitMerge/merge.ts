@@ -1,6 +1,8 @@
 import * as tl from 'vsts-task-lib/task';
 import * as ut from './functions';
 
+run();
+
 async function run() {
     try {
         tl.debug("Starting 'Git Merge' task");
@@ -79,9 +81,17 @@ async function run() {
         }
 
         // fetch the remote branches
-        if (ut.execGit(["fetch", remoteName]).code !== 0) {
-            tl.exit(1);
+        try {
+            var res = ut.execGit(["fetch", remoteName]);
+            if (res.code !== 0) {
+                tl.error(`Could not fetch ${remoteName}`);
+                return false;
+            }
+            return true;
         }
+        catch (err){
+            tl.error('unable to fetch remotes');
+         }      
 
         if (mergeType === "test") {
             var branchesToMerge = branchesToMergeStr.split(',');
@@ -190,5 +200,3 @@ async function run() {
         }
     tl.debug("Leaving Git Merge task");
 }
-
-run();

@@ -1,6 +1,7 @@
 import * as tl from 'vsts-task-lib/task';
 import * as ut from './functions';
 
+
 run();
 
 async function run() {
@@ -52,7 +53,7 @@ async function run() {
         }
 
         if (ut.isEmpty(sourceCommitId)) {
-            tl.debug(`Using buid source commit id ${buildSourceCommitId} as the commit id`);
+            tl.debug(`Using build source commit id ${buildSourceCommitId} as the commit id`);
             sourceCommitId = buildSourceCommitId;
         }
 
@@ -65,7 +66,7 @@ async function run() {
             tl.mkdirP("__s");
             tl.cd("__s");
             if (!ut.cloneRepo(repoUrl, pat)) {
-                tl.exit(1);
+                tl.setResult(tl.TaskResult.Failed, "Unable to clone repository");
             }
             // cd to the repo directory
             tl.cd(ut.findSubdirs(process.cwd())[0]);
@@ -82,8 +83,9 @@ async function run() {
 
         // fetch the remote branches
         try {
-            var res = ut.execGit(["fetch", remoteName]);
-            if (res.code !== 0) {
+            let res:number;
+            ut.execGit(["fetch", remoteName]).then(r => res = r);
+            if (res !== 0) {
                 tl.error(`Could not fetch ${remoteName}`);
                 return false;
             }
@@ -112,12 +114,12 @@ async function run() {
 
             // we couldn't get all the branches, so fail
             if (errors) {
-                tl.exit(1);
+                tl.setResult(tl.TaskResult.Failed, "Unable to get all the branches");
             }
                 
             // make sure that we're on the repo commit before continuing
             if (!ut.checkoutCommit(sourceCommitId)) {
-                tl.exit(1);
+                tl.setResult(tl.TaskResult.Failed, "We're not on the repo commit.");
             }
                 
             // now that all the branches are local, test the merges
@@ -125,8 +127,9 @@ async function run() {
             for (var i = 0; i < branchesToMerge.length; i++) {
                 var branch = branchesToMerge[i].trim();
                     
-                var mergeRes = ut.merge(branch, false);
-                if (mergeRes.code === 0) {
+                let mergeRes:number;
+                ut.merge(branch, false).then(r => mergeRes = r);
+                if (mergeRes === 0) {
                     console.info(`No merge conflicts detected when merging ${branch}`);
                         
                     if (testMergeAll) {
@@ -137,11 +140,12 @@ async function run() {
                             tl.error("Commit failed");
                             break;
                         }
-                    } else {
-                        if (mergeRes.stdout.indexOf('Already up-to-date') < 0) {
-                            ut.abortMerge();
-                        }
-                    }
+                    } 
+                    // else {
+                    //     if (mergeRes.stdout.indexOf('Already up-to-date') < 0) {
+                    //         ut.abortMerge();
+                    //     }
+                    // }
                 } else {
                     errors++;
                     tl.error(`Merge ${branch} operation has conflicts (or failed)`);
@@ -153,17 +157,17 @@ async function run() {
                 
             // fail the task if there were errors
             if (errors > 0) {
-                tl.exit(1);
+                tl.setResult(tl.TaskResult.Failed, "Task failed - other error.");
             }
         } else {
             // pull the source and target branches
             if (!ut.pullBranch(remoteName, sourceBranch) || !ut.pullBranch(remoteName, targetBranch)){
-                tl.exit(1);
+                tl.setResult(tl.TaskResult.Failed, "Unable to pull source or target branches");
             }
                 
             // checkout the targetBranch
             if (!ut.checkoutBranch(targetBranch)) {
-                tl.exit(1);
+                tl.setResult(tl.TaskResult.Failed, "Unable to checkout the target branch");
             }
                 
             // build a message to point to build or release
@@ -182,12 +186,11 @@ async function run() {
             // merge in the commit id and push
             if (ut.mergeCommit(sourceCommitId, commitMessage)) {
                 if (!ut.push(remoteName, targetBranch)) {
-                    tl.exit(1);
+                    tl.setResult(tl.TaskResult.Failed, "Unable to merge the commit");
                 }
             } else {
-                tl.error(`Could not merge ${sourceCommitId} into ${targetBranch}. Check to ensure no merge conflicts.`)
                 ut.resetHead();
-                tl.exit(1);
+                tl.setResult(tl.TaskResult.Failed, `Could not merge ${sourceCommitId} into ${targetBranch}. Check to ensure no merge conflicts.`);
             }
         }
     }

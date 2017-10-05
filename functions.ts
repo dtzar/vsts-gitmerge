@@ -1,37 +1,30 @@
 import Q = require('q');
 import * as tl from 'vsts-task-lib/task';
-import * as tr from 'vsts-task-lib/toolrunner';
+import { ToolRunner } from 'vsts-task-lib/toolrunner';
 import * as fs from 'fs';
 
 export async function execGit(gitArgs: string[]) : Promise<number> {
-    var gitTool = tl.tool(tl.which("git",true));
+    let gitTool = new ToolRunner(tl.which("git",true));
     if (!gitTool) {
         throw new Error(tl.loc('Git not found'));
     }
     
     gitTool.arg(gitArgs);
     try {
-        var res : number = await gitTool.exec();
-        /** if (res.code !== 0) {
-            if (!isEmpty(res.stderr)) {
-                tl.error(res.stderr);
-            }
-            if (typeof res.error !== 'undefined' && typeof res.error.message !== 'undefined' && !isEmpty(res.error.message)) {
-                tl.error(res.error.message);
-            }
-        **/
+        let res : number = await gitTool.exec();
     }
     catch (err) {
         tl.debug('execGit failed');
-        tl.setResult(tl.TaskResult.Failed, tl.loc('GitFailed', err.message));
+        tl.setResult(tl.TaskResult.Failed, tl.loc('Git exe failed to run', err.message));
     }
-    return Q(res);
+    return;
 }
 
 export function cloneRepo(repoUrl: string, pat: string = ""): boolean {
     var url = getUrlWithToken(repoUrl, pat);
-    var res = execGit(["clone", url]);
-    if (res.code !== 0) {
+    let res:number
+    execGit(["clone", url]).then(r => res = r);
+    if (res !== 0) {
         tl.error(`Could not clone ${repoUrl}`);
         return false;
     }
@@ -49,9 +42,9 @@ function getUrlWithToken(repoUrl: string, pat: string): string {
 
 export function checkoutBranch(branch: string): boolean {
     tl.debug(`Checkout ${branch}`);
-    
-    var res = execGit(["checkout", branch]);
-    if (res.code !== 0) {
+    let res:number
+    execGit(["checkout", branch]).then(r => res = r);
+    if (res !== 0) {
         tl.error(`Could not checkout ${branch}`);
         return false;
     }
@@ -61,23 +54,25 @@ export function checkoutBranch(branch: string): boolean {
 export function checkoutCommit(commitId: string): boolean {
     tl.debug(`Checking out commit ${commitId}`);
     
-    var res = execGit(["checkout", commitId]);
-    if (res.code !== 0) {
+    let res:number;
+    execGit(["checkout", commitId]).then(r => res = r);
+    if (res !== 0) {
         tl.error(`Could not checkout ${commitId}`);
-        return false;
+        return res === -1;
     }
-    return true;
+    return res === 0;
 }
 
 export function resetHead(): boolean {
     tl.debug("Resetting HEAD");
     
-    var res = execGit(["reset", "--hard", "HEAD^"]);
-    if (res.code !== 0) {
+    let res:number;
+    execGit(["reset", "--hard", "HEAD^"]).then(r => res = r);
+    if (res !== 0) {
         tl.error(`Could not reset HEAD`);
-        return false;
+        return res === -1;
     }
-    return true;
+    return res === 0;
 }
 
 export function mergeCommit(commitId: string, message?: string): boolean {
@@ -86,10 +81,12 @@ export function mergeCommit(commitId: string, message?: string): boolean {
     if (message) {
         gitArgs.push("-m", message);
     }
-    return execGit(gitArgs).code === 0;
+    let result:number;
+    execGit(gitArgs).then(r => result = r);
+    return result === 0;
 }
 
-export function merge(branch: string, commit = false): tr.IExecResult {
+export function merge(branch: string, commit = false): Promise<number> {
     tl.debug(`Merging ${branch} with commit = ${commit}`);
     
     var gitArgs = ["merge"];
@@ -98,39 +95,49 @@ export function merge(branch: string, commit = false): tr.IExecResult {
     }
     gitArgs.push(branch);
     
-    var res = execGit(gitArgs);
+    let res:number;
+    let resprom = execGit(gitArgs).then(r => res = r);
     // abort the merge, but only if not up-to-date, or we're not committing or it failed
-    if (res.code !== 0 && !commit && res.stdout.indexOf('Already up-to-date') < 0) {
+    // removed this from evaluation for now:
+    // && res.stdout.indexOf('Already up-to-date') < 0
+    if (res !== 0 && !commit) {
         abortMerge();
     }
-    return res;
+    return resprom;
 }
 
 export function abortMerge() {
     tl.debug("Aborting merge");
-    
-    return execGit(["merge", "--abort"]).code === 0
+    let res:number;
+    execGit(["merge", "--abort"]).then(r => res = r);
+    return Boolean(res);
 }
 
 export function commit(message: string): boolean {
     tl.debug(`Committing with message ${message}`);
-    return execGit(["commit", "-m", `"${message}"`]).code === 0;
+    let res:number;
+    execGit(["commit", "-m", `"${message}"`]).then(r => res = r)
+    return Boolean(res);
 }
 
 export function push(remoteName: string, branchToMergeInto: string): boolean {
     tl.debug(`Pushing local commits`);
-    return execGit(["push", remoteName, `HEAD:${branchToMergeInto}`]).code === 0;
+    let res:number;
+    execGit(["push", remoteName, `HEAD:${branchToMergeInto}`]).then(r => res = r)
+    return Boolean(res);
 }
 
 export function pullBranch(remoteName: string, branch: string, commitId?: string): boolean {
     tl.debug(`Checking if branch ${branch} exists locally`);
     var localBranchExists = false;
-    var res = execGit(["branch"]);
-    if (res.code !== 0) {
+    let res:number;
+    execGit(["branch"]).then(r => res = r);
+    
+    if (res !== 0) {
         tl.error(`Could not execute [git branch]`);
         return false;
     } else {
-        var branchList: string = (<any>res.stdout).toString('utf-8');
+        var branchList: string //= (<any>res.stdout).toString('utf-8');
         localBranchExists = branchList.indexOf(`${branch}\n`) > -1;
     }
     
@@ -138,8 +145,8 @@ export function pullBranch(remoteName: string, branch: string, commitId?: string
     if (!localBranchExists) {
         // check branch out from origin
         tl.debug(`Checking out and tracking remote branch: ${remoteBranch}`)
-        res = execGit(["checkout", "--track", remoteBranch]);
-        if (res.code !== 0) {
+        execGit(["checkout", "--track", remoteBranch]).then(r => res = r);
+        if (res !== 0) {
             tl.error(`Could not checkout remote branch ${remoteBranch}`);
             return false;
         }
@@ -151,7 +158,8 @@ export function pullBranch(remoteName: string, branch: string, commitId?: string
     } else {
         // if the branch exists locally, then make sure it's up to date
         tl.debug(`Resetting branch ${branch}`);
-        return execGit(["reset", "--hard", remoteBranch]).code === 0;
+        execGit(["reset", "--hard", remoteBranch]).then(r => res = r);
+        return Boolean(res);
     }
     return true;
 }
@@ -159,8 +167,9 @@ export function pullBranch(remoteName: string, branch: string, commitId?: string
 export function setRemote(repoUrl: string, token: string, remoteName: string): boolean {
     tl.debug(`Setting remote ${remoteName} for repo ${repoUrl}`);
     var url = getUrlWithToken(repoUrl, token);
-    
-    return execGit(["remote", "set-url", remoteName, url]).code === 0;
+    let res:number;
+    execGit(["remote", "set-url", remoteName, url]).then(r => res = r);
+    return Boolean(res);
 }
 
 export function isEmpty(s: string): boolean {

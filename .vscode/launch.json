@@ -8,7 +8,7 @@
             "type": "node",
             "request": "launch",
             "name": "Launch Program",
-            "program": "${workspaceRoot}/GitMerge/merge.js",
+            "program": "${workspaceRoot}/merge.js",
             "cwd": "${workspaceRoot}",
             "env": {
                 "INPUT_mergeType": "test",

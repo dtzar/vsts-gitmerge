@@ -20,9 +20,9 @@
   },
   "homepage": "https://marketplace.visualstudio.com/items?itemName=dtzar.git-merge",
   "devDependencies": {
-    "process": "^0.11.1",
-    "q": "^1.4.1",
-    "shelljs": "^0.5.3",
-    "vsts-task-lib": "^0.9.20"
+    "process": "^0.11.10",
+    "q": "^1.5.0",
+    "shelljs": "^0.7.8",
+    "vsts-task-lib": "2.1.0"
   }
 }

@@ -83,16 +83,15 @@ async function run() {
 
         // fetch the remote branches
         try {
-            let res:number;
-            ut.execGit(["fetch", remoteName]).then(r => res = r);
-            if (res !== 0) {
+            let res:any = ut.execGitSync(["fetch", remoteName]);
+            if (res.code !== 0) {
                 tl.error(`Could not fetch ${remoteName}`);
-                return false;
+                return ;
             }
-            return true;
         }
         catch (err){
             tl.error('unable to fetch remotes');
+            return;
          }      
 
         if (mergeType === "test") {
@@ -118,18 +117,20 @@ async function run() {
             }
                 
             // make sure that we're on the repo commit before continuing
+            // not sure why commented out - karstenj
+            /*
             if (!ut.checkoutCommit(sourceCommitId)) {
                 tl.setResult(tl.TaskResult.Failed, "We're not on the repo commit.");
             }
-                
+              */  
             // now that all the branches are local, test the merges
             errors = 0;
             for (var i = 0; i < branchesToMerge.length; i++) {
                 var branch = branchesToMerge[i].trim();
                     
-                let mergeRes:number;
-                ut.merge(branch, false).then(r => mergeRes = r);
-                if (mergeRes === 0) {
+                let mergeRes:any;
+                mergeRes = ut.merge(branch, false);
+                if (mergeRes.code === 0) {
                     console.info(`No merge conflicts detected when merging ${branch}`);
                         
                     if (testMergeAll) {
@@ -141,11 +142,11 @@ async function run() {
                             break;
                         }
                     } 
-                    // else {
-                    //     if (mergeRes.stdout.indexOf('Already up-to-date') < 0) {
-                    //         ut.abortMerge();
-                    //     }
-                    // }
+                         else {
+                             if (mergeRes.stdout.indexOf('Already up-to-date') < 0) {
+                                 ut.abortMerge();
+                             }
+                         }
                 } else {
                     errors++;
                     tl.error(`Merge ${branch} operation has conflicts (or failed)`);
@@ -153,7 +154,8 @@ async function run() {
             }
                 
             // clean up
-            ut.checkoutCommit(sourceCommitId);
+            // again not sure the point of this --karsten
+            //ut.checkoutCommit(sourceCommitId);
                 
             // fail the task if there were errors
             if (errors > 0) {

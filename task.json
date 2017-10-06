@@ -2,8 +2,8 @@
   "id": "e927ed99-f19e-4c55-9e87-ccf0409b4689",
   "name": "gitMerge",
   "friendlyName": "Git Merge",
-  "description": "Test merges and optionally commit",
-  "author": "Microsoft",
+  "description": "Test for merge conflicts OR merge commit + push desired branches.",
+  "author": "David Tesar",
   "helpMarkDown": "",
   "category": "Utility",
   "visibility": [
@@ -14,7 +14,7 @@
   "version": {
     "Major": "0",
     "Minor": "0",
-    "Patch": "52"
+    "Patch": "65"
   },
   "minimumAgentVersion": "1.91.0",
   "instanceNameFormat": "Git Merge",
@@ -22,7 +22,7 @@
     {
       "name": "advanced",
       "displayName": "Advanced",
-      "isExpanded": false
+      "isExpanded": true
     }
   ],
   "inputs": [
@@ -79,7 +79,7 @@
       "label": "URL of the repo",
       "defaultValue": "",
       "required": true,
-      "helpMarkDown": "URL of the repo."
+      "helpMarkDown": "URL of the repo. i.e. https://myaccount.visualstudio.com/_git/MyRepoName"
     },
     {
       "name": "remoteName",

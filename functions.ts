@@ -1,34 +1,60 @@
-import * as tl from 'vso-task-lib/vsotask';
-import * as tr from 'vso-task-lib/toolrunner';
+import Q = require('q');
+import * as tl from 'vsts-task-lib/task';
+import { ToolRunner } from 'vsts-task-lib/toolrunner';
 import * as fs from 'fs';
 
-export function execGit(gitArgs: string[]): tr.IExecResult {
-    var gitTool = tl.createToolRunner(tl.which("git", true));
-    var opts: tr.IExecOptions = {
-        failOnStdErr: true
-    };
+export async function execGit(gitArgs: string[]) : Promise<number> {
+    let gitTool = new ToolRunner(tl.which("git",true));
+    if (!gitTool) {
+        throw new Error(tl.loc('Git not found'));
+    }
     
     gitTool.arg(gitArgs);
-    var res = gitTool.execSync(opts);
-    if (res.code !== 0) {
-        if (!isEmpty(res.stderr)) {
-            tl.error(res.stderr);
-        }
-        if (typeof res.error !== 'undefined' && typeof res.error.message !== 'undefined' && !isEmpty(res.error.message)) {
-            tl.error(res.error.message);
-        }
+    try {
+        return await gitTool.exec();
     }
-    return res;
+    catch (err) {
+        tl.debug('execGit failed');
+        tl.setResult(tl.TaskResult.Failed, tl.loc('Git exe failed to run', err.message));
+    }
+}
+ export function execGitSync(gitArgs: string[]) : any  {
+    let gitTool = new ToolRunner(tl.which("git",true));
+    if (!gitTool) {
+        throw new Error(tl.loc('Git not found'));
+    }
+    
+    gitTool.arg(gitArgs);
+    try {
+        let obj:any = gitTool.execSync(); 
+        return obj;
+    }
+    catch (err) {
+        tl.debug('execGit failed');
+        tl.setResult(tl.TaskResult.Failed, tl.loc('Git exe failed to run', err.message));
+    }
+    return;
 }
 
 export function cloneRepo(repoUrl: string, pat: string = ""): boolean {
     var url = getUrlWithToken(repoUrl, pat);
-    var res = execGit(["clone", url]);
+    let res:any = this.execGitSync(["clone", url]);
     if (res.code !== 0) {
         tl.error(`Could not clone ${repoUrl}`);
         return false;
     }
     return true;
+
+    /*
+    return this.execGit(["clone", url]).then(res => {
+        if (res !== 0) {
+            tl.error(`Could not clone ${repoUrl}`);
+            return false;
+        }
+        return true;
+    
+    });
+    */
 }
 
 function getUrlWithToken(repoUrl: string, pat: string): string {
@@ -42,35 +68,43 @@ function getUrlWithToken(repoUrl: string, pat: string): string {
 
 export function checkoutBranch(branch: string): boolean {
     tl.debug(`Checkout ${branch}`);
+    let res:number
+    return this.execGit(["checkout", branch]).then(res => {
+        if (res !== 0) {
+            tl.error(`Could not checkout ${branch}`);
+            return false;
+        }
+        return true;
     
-    var res = execGit(["checkout", branch]);
-    if (res.code !== 0) {
-        tl.error(`Could not checkout ${branch}`);
-        return false;
-    }
-    return true;
+    });
 }
 
 export function checkoutCommit(commitId: string): boolean {
     tl.debug(`Checking out commit ${commitId}`);
     
-    var res = execGit(["checkout", commitId]);
-    if (res.code !== 0) {
-        tl.error(`Could not checkout ${commitId}`);
-        return false;
-    }
-    return true;
+    let res:number;
+    return this.execGit(["checkout", commitId]).then(res => {
+        if (res !== 0) {
+            tl.error(`Could not checkout ${commitId}`);
+            return res === -1;
+        }
+        return res === 0;
+    
+    });
 }
 
 export function resetHead(): boolean {
     tl.debug("Resetting HEAD");
     
-    var res = execGit(["reset", "--hard", "HEAD^"]);
-    if (res.code !== 0) {
-        tl.error(`Could not reset HEAD`);
-        return false;
-    }
-    return true;
+    let res:number;
+    return this.execGit(["reset", "--hard", "HEAD^"]).then(res => {
+        if (res !== 0) {
+            tl.error(`Could not reset HEAD`);
+            return res === -1;
+        }
+        return res === 0;
+    
+    });
 }
 
 export function mergeCommit(commitId: string, message?: string): boolean {
@@ -79,10 +113,14 @@ export function mergeCommit(commitId: string, message?: string): boolean {
     if (message) {
         gitArgs.push("-m", message);
     }
-    return execGit(gitArgs).code === 0;
+    let result:number;
+    return this.execGit(gitArgs).then(result => {
+        return result === 0;
+        
+    });
 }
 
-export function merge(branch: string, commit = false): tr.IExecResult {
+export function merge(branch: string, commit = false): any{
     tl.debug(`Merging ${branch} with commit = ${commit}`);
     
     var gitArgs = ["merge"];
@@ -91,8 +129,11 @@ export function merge(branch: string, commit = false): tr.IExecResult {
     }
     gitArgs.push(branch);
     
-    var res = execGit(gitArgs);
+   
+    let res:any = this.execGitSync(gitArgs);
     // abort the merge, but only if not up-to-date, or we're not committing or it failed
+    // removed this from evaluation for now:
+    // && 
     if (res.code !== 0 && !commit && res.stdout.indexOf('Already up-to-date') < 0) {
         abortMerge();
     }
@@ -101,24 +142,36 @@ export function merge(branch: string, commit = false): tr.IExecResult {
 
 export function abortMerge() {
     tl.debug("Aborting merge");
-    
-    return execGit(["merge", "--abort"]).code === 0
+    let res:number;
+    return this.execGit(["merge", "--abort"]).then(res => {
+        return Boolean(res);
+        
+    });
 }
 
 export function commit(message: string): boolean {
     tl.debug(`Committing with message ${message}`);
-    return execGit(["commit", "-m", `"${message}"`]).code === 0;
+    let res:number;
+    return this.execGit(["commit", "-m", `"${message}"`]).then(res =>{
+        return Boolean(res);
+        
+    })
 }
 
 export function push(remoteName: string, branchToMergeInto: string): boolean {
     tl.debug(`Pushing local commits`);
-    return execGit(["push", remoteName, `HEAD:${branchToMergeInto}`]).code === 0;
+    let res:number;
+    return this.execGit(["push", remoteName, `HEAD:${branchToMergeInto}`]).then(res =>{
+        return Boolean(res);
+        
+    });
 }
 
 export function pullBranch(remoteName: string, branch: string, commitId?: string): boolean {
     tl.debug(`Checking if branch ${branch} exists locally`);
     var localBranchExists = false;
-    var res = execGit(["branch"]);
+    let res:any = this.execGitSync(["branch"]);
+    
     if (res.code !== 0) {
         tl.error(`Could not execute [git branch]`);
         return false;
@@ -131,8 +184,8 @@ export function pullBranch(remoteName: string, branch: string, commitId?: string
     if (!localBranchExists) {
         // check branch out from origin
         tl.debug(`Checking out and tracking remote branch: ${remoteBranch}`)
-        res = execGit(["checkout", "--track", remoteBranch]);
-        if (res.code !== 0) {
+        let res2 = execGitSync(["checkout", "--track", remoteBranch]);
+        if (res2.code !== 0) {
             tl.error(`Could not checkout remote branch ${remoteBranch}`);
             return false;
         }
@@ -144,7 +197,8 @@ export function pullBranch(remoteName: string, branch: string, commitId?: string
     } else {
         // if the branch exists locally, then make sure it's up to date
         tl.debug(`Resetting branch ${branch}`);
-        return execGit(["reset", "--hard", remoteBranch]).code === 0;
+        let res3:any = execGit(["reset", "--hard", remoteBranch]);
+        return Boolean(res.code);
     }
     return true;
 }
@@ -152,8 +206,11 @@ export function pullBranch(remoteName: string, branch: string, commitId?: string
 export function setRemote(repoUrl: string, token: string, remoteName: string): boolean {
     tl.debug(`Setting remote ${remoteName} for repo ${repoUrl}`);
     var url = getUrlWithToken(repoUrl, token);
-    
-    return execGit(["remote", "set-url", remoteName, url]).code === 0;
+    let res:number;
+    return this.execGit(["remote", "set-url", remoteName, url]).then(res => {
+        return Boolean(res);
+        
+    });
 }
 
 export function isEmpty(s: string): boolean {

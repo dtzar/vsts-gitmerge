@@ -1,6 +1,4 @@
 # Git Merge Task
-
-## Overview
 This [VSTS/TFS marketplace task](https://marketplace.visualstudio.com/items?itemName=dtzar.git-merge) does a test merge or actual merge and push of vsts-based git branches in the build or release areas.
 
 ## Modes

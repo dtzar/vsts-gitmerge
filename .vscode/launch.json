@@ -1,0 +1,34 @@
+{
+    // Use IntelliSense to learn about possible Node.js debug attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch Program",
+            "program": "${workspaceRoot}/merge.js",
+            "cwd": "${workspaceRoot}",
+            "env": {
+                "INPUT_mergeType": "test",
+                "INPUT_branchesToTest": "test",
+                "INPUT_testMergeAll": "false",
+                "INPUT_targetBranch": "master",
+                "INPUT_remoteName": "origin",
+                "INPUT_repoUrl": "https://my.visualstudio.com/",
+                //"INPUT_sourceCommitId": " 885d0280daee9eeb8069ba0f4fc7459f6549f572",
+                "INPUT_pat": "ccc",
+                "INPUT_sourceBranch": "master"
+                //buildSourceCommitId = tl.getVariable("Build.SourceVersion");
+                //token = tl.getVariable('System.AccessToken');
+            }
+        },
+        {
+            "type": "node",
+            "request": "attach",
+            "name": "Attach to Process",
+            "port": 5858
+        }
+    ]
+}

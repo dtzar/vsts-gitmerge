@@ -1,6 +1,15 @@
 {
 	"compilerOptions": {
 		"module": "commonjs",
+		"target": "ES6",
+		"lib": ["es2015"],
 		"sourceMap": true
-	}
+	},
+	"files": [
+        "functions.ts",
+        "merge.ts"
+    ],
+	"exclude": [
+		"node_modules"
+	]
 }

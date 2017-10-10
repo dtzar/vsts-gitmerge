@@ -1,5 +1,5 @@
-import * as tl from 'vso-task-lib/vsotask';
-import * as tr from 'vso-task-lib/toolrunner';
+import * as tl from 'vsts-task-lib/task';
+import { ToolRunner } from 'vsts-task-lib/toolrunner';
 import * as ut from './functions';
 
 tl.debug("Starting 'Git Merge' task");
@@ -63,7 +63,7 @@ if (ut.isEmpty(sourceDir)) {
     tl.mkdirP("__s");
     tl.cd("__s");
     if (!ut.cloneRepo(repoUrl, pat)) {
-        tl.exit(1);
+        tl.setResult(tl.TaskResult.Failed, "Unable to clone repository");
     }
     // cd to the repo directory
     tl.cd(ut.findSubdirs(process.cwd())[0]);
@@ -80,7 +80,7 @@ if (ut.isEmpty(sourceDir)) {
 
 // fetch the remote branches
 if (ut.execGit(["fetch", remoteName]).code !== 0) {
-    tl.exit(1);
+    tl.setResult(tl.TaskResult.Failed, "Unable to fetch remote branches");
 }
 
 if (mergeType === "test") {
@@ -102,12 +102,12 @@ if (mergeType === "test") {
 
     // we couldn't get all the branches, so fail
     if (errors) {
-        tl.exit(1);
+        tl.setResult(tl.TaskResult.Failed, "Unable to get all the branches");
     }
     
     // make sure that we're on the repo commit before continuing
     if (!ut.checkoutCommit(sourceCommitId)) {
-        tl.exit(1);
+        tl.setResult(tl.TaskResult.Failed, "Unable to checkout commit");
     }
     
     // now that all the branches are local, test the merges
@@ -143,17 +143,17 @@ if (mergeType === "test") {
     
     // fail the task if there were errors
     if (errors > 0) {
-        tl.exit(1);
+        tl.setResult(tl.TaskResult.Failed, "Errors happened during operation");
     }
 } else {
     // pull the source and target branches
     if (!ut.pullBranch(remoteName, sourceBranch) || !ut.pullBranch(remoteName, targetBranch)){
-        tl.exit(1);
+        tl.setResult(tl.TaskResult.Failed, "Unable to pull the source or target branch");
     }
     
     // checkout the targetBranch
     if (!ut.checkoutBranch(targetBranch)) {
-        tl.exit(1);
+        tl.setResult(tl.TaskResult.Failed, "Unable to checkout the target branch");
     }
     
     // build a message to point to build or release
@@ -172,12 +172,11 @@ if (mergeType === "test") {
     // merge in the commit id and push
     if (ut.mergeCommit(sourceCommitId, commitMessage)) {
         if (!ut.push(remoteName, targetBranch)) {
-            tl.exit(1);
+            tl.setResult(tl.TaskResult.Failed, "Unable to merge the commit");
         }
     } else {
-        tl.error(`Could not merge ${sourceCommitId} into ${targetBranch}. Possibley a merge conflict?`)
+        tl.setResult(tl.TaskResult.Failed, `Could not merge ${sourceCommitId} into ${targetBranch}. Check to ensure no merge conflicts.`);
         ut.resetHead();
-        tl.exit(1);
     }
 }
 

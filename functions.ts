@@ -1,24 +1,23 @@
-import * as tl from 'vso-task-lib/vsotask';
-import * as tr from 'vso-task-lib/toolrunner';
+import * as tl from 'vsts-task-lib/task';
+import { ToolRunner } from 'vsts-task-lib/toolrunner';
 import * as fs from 'fs';
 
-export function execGit(gitArgs: string[]): tr.IExecResult {
-    var gitTool = tl.createToolRunner(tl.which("git", true));
-    var opts: tr.IExecOptions = {
-        failOnStdErr: true
-    };
+export function execGit(gitArgs: string[]): any { //tr.IExecResult --> any
+    let gitTool =  new ToolRunner(tl.which("git", true));
+    // var opts: tr.IExecOptions = {
+    //     failOnStdErr: true
+    // };
     
     gitTool.arg(gitArgs);
-    var res = gitTool.execSync(opts);
-    if (res.code !== 0) {
-        if (!isEmpty(res.stderr)) {
-            tl.error(res.stderr);
-        }
-        if (typeof res.error !== 'undefined' && typeof res.error.message !== 'undefined' && !isEmpty(res.error.message)) {
-            tl.error(res.error.message);
-        }
+    try {
+        let obj:any = gitTool.execSync(); 
+        return obj;
     }
-    return res;
+    catch (err) {
+        tl.debug('execGit failed');
+        tl.setResult(tl.TaskResult.Failed, tl.loc('Git exe failed to run', err.message));
+    }
+    return;
 }
 
 export function cloneRepo(repoUrl: string, pat: string = ""): boolean {
@@ -82,7 +81,7 @@ export function mergeCommit(commitId: string, message?: string): boolean {
     return execGit(gitArgs).code === 0;
 }
 
-export function merge(branch: string, commit = false): tr.IExecResult {
+export function merge(branch: string, commit = false): any {//tr.IExecResult --> any
     tl.debug(`Merging ${branch} with commit = ${commit}`);
     
     var gitArgs = ["merge"];

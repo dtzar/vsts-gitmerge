@@ -1,16 +1,13 @@
 import * as tl from 'vsts-task-lib/task';
-import { ToolRunner } from 'vsts-task-lib/toolrunner';
+import { IExecOptions, IExecSyncResult, ToolRunner } from 'vsts-task-lib/toolrunner';
 import * as fs from 'fs';
 
-export function execGit(gitArgs: string[]): any { //tr.IExecResult --> any
+export function execGit(gitArgs: string[], options?: IExecOptions): IExecSyncResult {
     let gitTool =  new ToolRunner(tl.which("git", true));
-    // var opts: tr.IExecOptions = {
-    //     failOnStdErr: true
-    // };
-    
     gitTool.arg(gitArgs);
+    options = options || <IExecOptions>{};
     try {
-        let obj:any = gitTool.execSync(); 
+        let obj:any = gitTool.execSync(options);
         return obj;
     }
     catch (err) {
@@ -81,9 +78,9 @@ export function mergeCommit(commitId: string, message?: string): boolean {
     return execGit(gitArgs).code === 0;
 }
 
-export function merge(branch: string, commit = false): any {//tr.IExecResult --> any
+export function merge(branch: string, commit = false): IExecSyncResult {
     tl.debug(`Merging ${branch} with commit = ${commit}`);
-    
+
     var gitArgs = ["merge"];
     if (!commit) {
         gitArgs.push("--no-commit", "--no-ff");

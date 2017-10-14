@@ -19,6 +19,7 @@ export function execGit(gitArgs: string[], options?: IExecOptions): IExecSyncRes
 
 export function cloneRepo(repoUrl: string, pat: string = ""): boolean {
     var url = getUrlWithToken(repoUrl, pat);
+
     var res = execGit(["clone", url]);
     if (res.code !== 0) {
         tl.error(`Could not clone ${repoUrl}`);
@@ -32,7 +33,10 @@ function getUrlWithToken(repoUrl: string, pat: string): string {
     if (!isEmpty(pat)) {
         var idx = url.indexOf("//") + 2;
         url = [repoUrl.slice(0, idx), `pat:${pat}@`, repoUrl.slice(idx)].join('');
+    } else {
+        tl.error('No PAT or OAuth token found.');
     }
+    tl.debug(`The new URL with token is: ${url}`)
     return url;
 }
 
@@ -145,9 +149,9 @@ export function pullBranch(remoteName: string, branch: string, commitId?: string
     return true;
 }
 
-export function setRemote(repoUrl: string, token: string, remoteName: string): boolean {
-    tl.debug(`Setting remote ${remoteName} for repo ${repoUrl}`);
-    var url = getUrlWithToken(repoUrl, token);
+export function setRemote(repoUrl: string, pat: string = "", remoteName: string): boolean {
+    tl.debug(`Setting remote ${remoteName} for repo ${repoUrl} with ${pat}`);
+    var url = getUrlWithToken(repoUrl, pat);
     
     return execGit(["remote", "set-url", remoteName, url]).code === 0;
 }

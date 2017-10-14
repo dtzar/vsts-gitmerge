@@ -49,12 +49,18 @@ if (ut.isEmpty(token)) {
     tl.debug(`The system Oauth token is present`);
 }
 
+// Fail the task if no OAuth token or PAT present
+if (ut.isEmpty(pat) && ut.isEmpty(token)) {
+    tl.setResult(tl.TaskResult.Failed, tl.loc('No PAT or OAuth token found. One of those is required to run the task.'));
+}
+
 if (ut.isEmpty(sourceCommitId)) {
     tl.debug(`Using buid source commit id ${buildSourceCommitId} as the commit id`);
     sourceCommitId = buildSourceCommitId;
 }
 
 var sourceDir = tl.getVariable("Build.SourcesDirectory");
+tl.debug(`buildSourcesDirectory: ${sourceDir}`)
 if (ut.isEmpty(sourceDir)) {
     // cd to the agent release dir
     var sourceDir = tl.getVariable("Agent.ReleaseDirectory");
@@ -70,12 +76,12 @@ if (ut.isEmpty(sourceDir)) {
     tl.debug(`Working dir: ${process.cwd()}`);
 } else {
     tl.cd(sourceDir);
-    // set the remote creds using the token
+    // set the remote creds using the pat since OAuth token not present
     if (ut.isEmpty(token)) {
-        tl.warning("Could not find System.AccessToken. Attempting to continue - if credentials fail, then please enable the token in the build Options page.");
-    } else {
-        ut.setRemote(repoUrl, token, remoteName);
-    }
+        tl.warning("Could not find System.AccessToken. Attempting to use PAT token. If credentials fail, then please enable the OAuth token in the build options page.");
+        ut.setRemote(repoUrl, pat, remoteName);
+        tl.debug(`Remote repo url now set to use PAT`)
+    } 
 }
 
 // fetch the remote branches
@@ -148,7 +154,7 @@ if (mergeType === "test") {
 } else {
     // pull the source and target branches
     if (!ut.pullBranch(remoteName, sourceBranch) || !ut.pullBranch(remoteName, targetBranch)){
-        tl.setResult(tl.TaskResult.Failed, "Unable to pull the source or target branch");
+        tl.setResult(tl.TaskResult.Failed, `Unable to pull the ${sourceBranch} source branch or ${targetBranch} target branch`);
     }
     
     // checkout the targetBranch
@@ -158,8 +164,9 @@ if (mergeType === "test") {
     
     // build a message to point to build or release
     var identifier = "build or release";
-    var releaseDefName = tl.getVariable("Release.DefinitionName");
-    if (ut.isEmpty(releaseDefName)) {
+
+    if (process.env.RELEASE_DEFINITION) {
+        var releaseDefName = tl.getVariable("Release.DefinitionName");
         var releaseName = tl.getVariable("Release.ReleaseName");
         identifier = `release ${releaseDefName} (${releaseName})`;
     } else {
@@ -172,10 +179,10 @@ if (mergeType === "test") {
     // merge in the commit id and push
     if (ut.mergeCommit(sourceCommitId, commitMessage)) {
         if (!ut.push(remoteName, targetBranch)) {
-            tl.setResult(tl.TaskResult.Failed, "Unable to merge the commit");
+            tl.setResult(tl.TaskResult.Failed, `Unable to merge ${sourceCommitId} source commit to ${targetBranch}`);
         }
     } else {
-        tl.setResult(tl.TaskResult.Failed, `Could not merge ${sourceCommitId} into ${targetBranch}. Check to ensure no merge conflicts.`);
+        tl.setResult(tl.TaskResult.Failed, `Unable to merge ${sourceCommitId} into ${targetBranch}. Check to ensure no merge conflicts.`);
         ut.resetHead();
     }
 }

@@ -3,7 +3,7 @@
   "name": "gitMerge",
   "friendlyName": "Git Merge",
   "description": "Test merges and optionally commit",
-  "author": "Microsoft",
+  "author": "David Tesar",
   "helpMarkDown": "",
   "category": "Utility",
   "visibility": [
@@ -13,10 +13,10 @@
   "demands": [],
   "version": {
     "Major": "0",
-    "Minor": "0",
-    "Patch": "52"
+    "Minor": "1",
+    "Patch": "8"
   },
-  "minimumAgentVersion": "1.91.0",
+  "minimumAgentVersion": "2.105.6",
   "instanceNameFormat": "Git Merge",
   "groups": [
     {

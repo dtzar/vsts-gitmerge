@@ -7,7 +7,7 @@ tl.debug("Starting 'Git Merge' task");
 // get the task vars
 var mergeType = tl.getInput("mergeType", true);
 var branchesToMergeStr = tl.getInput("branchesToTest", false);
-var testMergeAll = tl.getBoolInput("testMergeAll", true);
+//var testMergeAll = tl.getBoolInput("testMergeAll", true);
 var targetBranch = tl.getInput("targetBranch", true);
 var sourceCommitId = tl.getInput("sourceCommitId", false);
 var remoteName = tl.getInput("remoteName", true);
@@ -32,7 +32,7 @@ var token = tl.getVariable('System.AccessToken');
 tl.debug(`mergeType: ${mergeType}`);
 tl.debug(`branchesToMerge: ${branchesToMergeStr}`);
 tl.debug(`targetBranch: ${targetBranch}`);
-tl.debug(`testMergeAll: ${testMergeAll}`);
+//tl.debug(`testMergeAll: ${testMergeAll}`);
 tl.debug(`sourceCommitId: ${sourceCommitId}`);
 tl.debug(`remoteName: ${remoteName}`);
 tl.debug(`sourceBranch: ${sourceBranch}`);
@@ -125,20 +125,22 @@ if (mergeType === "test") {
         if (mergeRes.code === 0) {
             console.info(`No merge conflicts detected when merging ${branch}`);
             
-            if (testMergeAll) {
-                // if we're testing all the merges, then we need to commit before
-                // merging the next branch
-                if (!ut.commit("Testing merge")) {
-                    errors++;
-                    tl.error("Commit failed");
-                    break;
-                }
-            } else {
+            // if (testMergeAll) {
+            //     // if we're testing all the merges, then we need to commit before
+            //     // merging the next branch
+            //     if (!ut.commit("Testing merge")) {
+            //         errors++;
+            //         tl.error("Commit failed");
+            //         break;
+            //     }
+        } 
+            //else {
                 if (mergeRes.stdout.indexOf('Already up-to-date') < 0) {
                     ut.abortMerge();
                 }
-            }
-        } else {
+            //}
+        //} 
+        else {
             errors++;
             tl.error(`Merge ${branch} operation has conflicts (or failed)`);
         }

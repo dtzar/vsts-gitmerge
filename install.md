@@ -10,7 +10,7 @@
 
 1. Upload the task to your VSTS account
   <br> From the root of this repository, execute: 
-  <br> `tfx build tasks upload --task-path .\` 
+  <br> `tfx build tasks upload --task-path .` 
   <br> You should see a message which states that the task uploaded successfully.
 
 Now you can see the "Git Merge" utility task available to add via build or release.

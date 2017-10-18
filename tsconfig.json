@@ -6,8 +6,8 @@
 		"sourceMap": true
 	},
 	"files": [
-        "functions.ts",
-        "merge.ts"
+        "./gitmerge/functions.ts",
+        "./gitmerge/merge.ts"
     ],
 	"exclude": [
 		"node_modules"

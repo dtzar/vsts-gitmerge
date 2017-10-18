@@ -1,9 +1,12 @@
 {
   "name": "git-merge",
-  "version": "0.0.67",
+  "version": "0.1.3",
   "description": "Test and Perform merges of branches",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "uploadprivate": "tfx build tasks upload --task-path ./gitmerge",
+    "package": "tfx extension create --manifest-globs vss-extension.json",
+    "upload": "tfx extension publish --manifest-globs vss-extension.json"
   },
   "repository": {
     "type": "git",
@@ -20,6 +23,7 @@
   },
   "homepage": "https://marketplace.visualstudio.com/items?itemName=dtzar.git-merge",
   "devDependencies": {
+    "@types/node": "^8.0.44",
     "process": "^0.11.10",
     "q": "^1.5.0",
     "shelljs": "^0.7.8",

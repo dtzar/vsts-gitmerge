@@ -12,7 +12,6 @@ The specified branches will attempt to merge only local to the build agent and i
 ### Test Merge Mode
 When running in Test Merge Mode, you must set the repository of the build (in the Repository tab) to the "target" repo. Then specify:
 - **Branch(es) to Test Merge** - this is a comma-separated list of branches you want to test merging into the "target" repo
-- **Test merging all branches** - check this to test merging all the branches sequentially. If cleared, each branch will be tested independently against the branch to merge into.
 
 ### Merge Mode
 When running in Merge Mode, you must set the repository of the build (in the Repository tab) to the branch you want to merge. Then specify:

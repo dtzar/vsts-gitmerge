@@ -2,7 +2,7 @@
     "manifestVersion": 1,
     "id": "git-merge",
     "name": "Git Merge",
-    "version": "0.0.3",
+    "version": "0.1.3",
     "publisher": "dtzar",
     "targets": [
         {
@@ -10,15 +10,19 @@
         }
     ],    
     "description": "Test merges for conflicts between git branches OR actual merge commit and push of two git branches",
+    "public": true,
     "categories": [
         "Build and release"
-    ],
+    ],      
     "icons": {
-        "default": "icon.png"        
+        "default": "images/icon.png"        
     },
     "files": [
         {
-            "path": "GitMerge"
+            "path": "gitmerge"
+        },
+        {
+            "path": "images", "addressable": true
         }
     ],
        "content": {

@@ -3,7 +3,7 @@
   "name": "gitMerge",
   "friendlyName": "Git Merge",
   "description": "Test merges and optionally commit",
-  "author": "Microsoft",
+  "author": "David Tesar",
   "helpMarkDown": "",
   "category": "Utility",
   "visibility": [
@@ -13,10 +13,10 @@
   "demands": [],
   "version": {
     "Major": "0",
-    "Minor": "0",
-    "Patch": "52"
+    "Minor": "1",
+    "Patch": "3"
   },
-  "minimumAgentVersion": "1.91.0",
+  "minimumAgentVersion": "2.105.6",
   "instanceNameFormat": "Git Merge",
   "groups": [
     {
@@ -45,15 +45,6 @@
       "defaultValue": "",
       "required": true,
       "helpMarkDown": "Branch(es) to test merge into this build's repo branch (set in the Repository settings). Comma separate if there are multiple.",
-      "visibleRule": "mergeType = test"
-    },
-    {
-      "name": "testMergeAll",
-      "type": "boolean",
-      "label": "Test merging all branches",
-      "defaultValue": "false",
-      "required": true,
-      "helpMarkDown": "If checked, the test will try to merge all branches. If unchecked, branches will be tested independently.",
       "visibleRule": "mergeType = test"
     },
     {

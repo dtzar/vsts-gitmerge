@@ -4,20 +4,29 @@ Pull request contributions to enhance, repair, or improve this task are welcome.
 
 The below instructions are an easy reference to install and remove the task on your own VSTS/TFS account when doing local development and testing of the task itself. If you want to simply use the task in your own account, please install [this task via the public marketplace](https://marketplace.visualstudio.com/items?itemName=dtzar.git-merge).
 
-## Task Installation
+## Prerequisites
 
+1. Install typescript: `npm install -g typescript`
 1. Install the [tfx-cli tool](https://github.com/Microsoft/tfs-cli)
+1. Login with `tfx login`
+
 > Note: When you login, make sure to use the https://youraccount.visualstudio.com/DefaultCollection URL
 
 > Note: You have to be a member of the Team Foundation Administrators in order to upload the task.
+
+
+## Task Installation
 
 1. Install this vsts task dependencies
   <br> From the root of this repo simply execute:
   <br> `npm install`
 
+1. Compile the code into javascript
+  <br> `tsc`
+
 1. Upload the task to your VSTS account
   <br> From the root of this repository, execute:
-  <br> `tfx build tasks upload --task-path .\GitMerge`
+  <br> `npm run uploadprivate`
   <br> You should see a message which states that the task uploaded successfully.
 
 Now you can see the "Git Merge" utility task available to add via build or release.
@@ -34,7 +43,7 @@ Now you can see the "Git Merge" utility task available to add via build or relea
     friendly name : Git Merge
     visibility    : Build,Release
     description   : Test merges and optionally commit
-    version       : 0.0.52
+    version       : 0.1.3
    ```
 
 1. Delete the task

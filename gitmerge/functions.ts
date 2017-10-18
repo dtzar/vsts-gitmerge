@@ -1,28 +1,25 @@
-import * as tl from 'vso-task-lib/vsotask';
-import * as tr from 'vso-task-lib/toolrunner';
+import * as tl from 'vsts-task-lib/task';
+import { IExecOptions, IExecSyncResult, ToolRunner } from 'vsts-task-lib/toolrunner';
 import * as fs from 'fs';
 
-export function execGit(gitArgs: string[]): tr.IExecResult {
-    var gitTool = tl.createToolRunner(tl.which("git", true));
-    var opts: tr.IExecOptions = {
-        failOnStdErr: true
-    };
-    
+export function execGit(gitArgs: string[], options?: IExecOptions): IExecSyncResult {
+    let gitTool =  new ToolRunner(tl.which("git", true));
     gitTool.arg(gitArgs);
-    var res = gitTool.execSync(opts);
-    if (res.code !== 0) {
-        if (!isEmpty(res.stderr)) {
-            tl.error(res.stderr);
-        }
-        if (typeof res.error !== 'undefined' && typeof res.error.message !== 'undefined' && !isEmpty(res.error.message)) {
-            tl.error(res.error.message);
-        }
+    options = options || <IExecOptions>{};
+    try {
+        let obj:any = gitTool.execSync(options);
+        return obj;
     }
-    return res;
+    catch (err) {
+        tl.debug('execGit failed');
+        tl.setResult(tl.TaskResult.Failed, tl.loc('Git exe failed to run', err.message));
+    }
+    return;
 }
 
 export function cloneRepo(repoUrl: string, pat: string = ""): boolean {
     var url = getUrlWithToken(repoUrl, pat);
+
     var res = execGit(["clone", url]);
     if (res.code !== 0) {
         tl.error(`Could not clone ${repoUrl}`);
@@ -36,7 +33,10 @@ function getUrlWithToken(repoUrl: string, pat: string): string {
     if (!isEmpty(pat)) {
         var idx = url.indexOf("//") + 2;
         url = [repoUrl.slice(0, idx), `pat:${pat}@`, repoUrl.slice(idx)].join('');
+    } else {
+        tl.error('No PAT or OAuth token found.');
     }
+    tl.debug(`The new URL with token is: ${url}`)
     return url;
 }
 
@@ -82,9 +82,9 @@ export function mergeCommit(commitId: string, message?: string): boolean {
     return execGit(gitArgs).code === 0;
 }
 
-export function merge(branch: string, commit = false): tr.IExecResult {
+export function merge(branch: string, commit = false): IExecSyncResult {
     tl.debug(`Merging ${branch} with commit = ${commit}`);
-    
+
     var gitArgs = ["merge"];
     if (!commit) {
         gitArgs.push("--no-commit", "--no-ff");
@@ -149,9 +149,9 @@ export function pullBranch(remoteName: string, branch: string, commitId?: string
     return true;
 }
 
-export function setRemote(repoUrl: string, token: string, remoteName: string): boolean {
-    tl.debug(`Setting remote ${remoteName} for repo ${repoUrl}`);
-    var url = getUrlWithToken(repoUrl, token);
+export function setRemote(repoUrl: string, pat: string = "", remoteName: string): boolean {
+    tl.debug(`Setting remote ${remoteName} for repo ${repoUrl} with ${pat}`);
+    var url = getUrlWithToken(repoUrl, pat);
     
     return execGit(["remote", "set-url", remoteName, url]).code === 0;
 }
@@ -165,4 +165,19 @@ export function findSubdirs(path: string): string[] {
         var subDir = `${path}/${d}`;
         return fs.statSync(subDir).isDirectory();
     });
+}
+
+export function setGitCredentials(username: string, useremail: string): boolean {
+    tl.debug(`Setting global git user credentials for the task session`);
+    var res = execGit(["config","--global","user.name", username]);
+    if (res.code !== 0) {
+        tl.error(`Could not set git config user.name`);
+        return false;
+    }
+    var res = execGit(["config", "--global", "user.email", useremail]);
+    if (res.code !== 0) {
+        tl.error(`Could not set git config user.email`);
+        return false;
+    }
+    return true;
 }

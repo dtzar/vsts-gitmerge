@@ -166,3 +166,18 @@ export function findSubdirs(path: string): string[] {
         return fs.statSync(subDir).isDirectory();
     });
 }
+
+export function setGitCredentials(username: string, useremail: string): boolean {
+    tl.debug(`Setting global git user credentials for the task session`);
+    var res = execGit(["config","--global","user.name", username]);
+    if (res.code !== 0) {
+        tl.error(`Could not set git config user.name`);
+        return false;
+    }
+    var res = execGit(["config", "--global", "user.email", useremail]);
+    if (res.code !== 0) {
+        tl.error(`Could not set git config user.email`);
+        return false;
+    }
+    return true;
+}

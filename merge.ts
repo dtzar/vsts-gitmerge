@@ -93,6 +93,11 @@ if (taskerror === false) { // skip actual task work to exit task
         tl.setResult(tl.TaskResult.Failed, "Unable to fetch remote branches");
     }
 
+    // Set the git user credentials to avoid errors
+    if (!ut.setGitCredentials("GitTask", "gittask@notused.com")){
+        tl.setResult(tl.TaskResult.Failed, "Unable to set git config credentials");
+    }
+
     if (mergeType === "test") {
         var branchesToMerge = branchesToMergeStr.split(',');
         console.info(`Found ${branchesToMerge.length} branches to test`);

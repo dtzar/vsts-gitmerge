@@ -26,7 +26,7 @@ var pat = tl.getInput("pat", false);
 // get build vars
 var sourceBranch = tl.getVariable("Build.SourceBranchName");
 var buildSourceCommitId = tl.getVariable("Build.SourceVersion");
-var token = tl.getVariable('System.AccessToken');
+var token = tl.getEndpointAuthorizationParameter("SystemVssConnection", "AccessToken", false);
 
 tl.debug(`mergeType: ${mergeType}`);
 tl.debug(`branchesToMerge: ${branchesToMergeStr}`);

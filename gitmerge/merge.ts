@@ -1,5 +1,4 @@
-import * as tl from 'vsts-task-lib/task';
-import { ToolRunner } from 'vsts-task-lib/toolrunner';
+import * as tl from 'azure-pipelines-task-lib';
 import * as ut from './functions';
 
 tl.debug("Starting 'Git Merge' task");

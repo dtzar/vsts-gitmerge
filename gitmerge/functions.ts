@@ -1,5 +1,5 @@
-import * as tl from 'vsts-task-lib/task';
-import { IExecOptions, IExecSyncResult, ToolRunner } from 'vsts-task-lib/toolrunner';
+import * as tl from 'azure-pipelines-task-lib/task';
+import { IExecOptions, IExecSyncResult, ToolRunner } from 'azure-pipelines-task-lib/toolrunner';
 import * as fs from 'fs';
 
 export function execGit(gitArgs: string[], options?: IExecOptions): IExecSyncResult {

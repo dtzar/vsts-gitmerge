@@ -1,10 +1,13 @@
 {
   "name": "git-merge",
-  "version": "0.1.4",
+  "version": "0.1.13",
   "description": "Test and Perform merges of branches",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "uploadprivate": "tfx build tasks upload --task-path ./gitmerge",
+    "copynodemods": "xcopy /i /s /y node_modules gitmerge\\node_modules",
+    "uploadrawprivate": "tfx build tasks upload --overwrite --task-path ./gitmerge",
+    "uploadprivate": "tfx extension publish --manifest-globs vss-extension.json --share-with dtzar",
+    "delete": "tfx build tasks delete --task-id e927ed99-f19e-4c55-9e87-ccf0409b4689",
     "package": "tfx extension create --manifest-globs vss-extension.json",
     "upload": "tfx extension publish --manifest-globs vss-extension.json"
   },

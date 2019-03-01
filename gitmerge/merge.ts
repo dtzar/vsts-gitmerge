@@ -1,4 +1,4 @@
-import * as tl from 'azure-pipelines-task-lib';
+import * as tl from 'azure-pipelines-task-lib/task';
 import * as ut from './functions';
 
 tl.debug("Starting 'Git Merge' task");

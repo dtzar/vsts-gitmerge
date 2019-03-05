@@ -1,0 +1,71 @@
+{
+    "manifestVersion": 1,
+    "id": "git-merge-dev",
+    "name": "Git Merge Dev",
+    "version": "0.2.0",
+    "publisher": "dtzar",
+    "targets": [
+        {
+            "id": "Microsoft.VisualStudio.Services"
+        }
+    ],    
+    "description": "Test merges for conflicts between git branches OR actual merge commit and push of two git branches",
+    "categories": [
+        "Azure Pipelines"
+    ],      
+    "icons": {
+        "default": "images/icon.png"        
+    },
+    "files": [
+        {
+            "path": "gitmerge"
+        },
+        {
+            "path": "images", "addressable": true
+        }
+    ],
+       "content": {
+        "details": {
+            "path": "readme.md"
+        },
+        "license": {
+            "path": "LICENSE"
+        }
+    },
+	"links": {
+        "home": {
+            "uri": "https://github.com/dtzar/vsts-gitmerge"
+        },
+        "getstarted": {
+            "uri": "https://github.com/dtzar/vsts-gitmerge/blob/master/readme.md"
+        },
+        "learn": {
+            "uri": "http://bit.ly/vstsgitmerge"
+        },
+        "support": {
+            "uri": "https://github.com/dtzar/vsts-gitmerge/issues"
+        },
+        "repository": {
+            "uri": "https://github.com/dtzar/vsts-gitmerge"
+        },
+        "issues": {
+            "uri": "https://github.com/dtzar/vsts-gitmerge/issues"
+        }
+    },
+    "branding": {
+        "color": "rgb(0,111,196)",
+        "theme": "dark"
+    },
+    "contributions": [
+        {
+            "id": "git-merge-task",
+            "type": "ms.vss-distributed-task.task",
+            "targets": [
+                "ms.vss-distributed-task.tasks"
+            ],
+            "properties": {
+                "name": "GitMerge"
+            }
+        }
+    ]
+}

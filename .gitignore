@@ -15,11 +15,14 @@ pids
 node_modules
 .lock
 .npm
+package-lock.json
 
 # Visual Studio specific
 *.vs
 *.vsix
+.taskkey
 
 # Typescript
 *.map
 **/*.js
+

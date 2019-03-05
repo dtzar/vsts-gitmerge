@@ -34,7 +34,7 @@ function getUrlWithToken(repoUrl: string, pat: string): string {
         var idx = url.indexOf("//") + 2;
         url = [repoUrl.slice(0, idx), `pat:${pat}@`, repoUrl.slice(idx)].join('');
     } else {
-        tl.error('No PAT or OAuth token found.');
+        tl.warning('No PAT or OAuth token found.');
     }
     tl.debug(`The new URL with token is: ${url}`)
     return url;

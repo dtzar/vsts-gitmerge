@@ -190,9 +190,9 @@ if (taskerror === false) { // skip actual task work to exit task
             var identifier = `build ${buildName} (${buildNo})`;
         }
         if (!gitCommitMessage || gitCommitMessage.length === 0){
-          gitCommitMessage = "Merging commit ";
+          gitCommitMessage = `Merging commit ${identifier}`;
         }
-        var commitMessage = `${gitCommitMessage} ${identifier}`;
+        var commitMessage = `${gitCommitMessage}`;
         // merge in the commit id and push
         if (ut.mergeCommit(sourceCommitId, commitMessage)) {
             if (!ut.push(remoteName, targetBranch)) {

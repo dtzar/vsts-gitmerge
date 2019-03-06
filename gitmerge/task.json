@@ -112,9 +112,9 @@
       "name": "gitCommitMessage",
       "type": "string",
       "label": "Git Commit Message",
-      "defaultValue": "Merging commit ",
+      "defaultValue": "",
       "required": false,
-      "helpMarkDown": "Git commit message used for the merge",
+      "helpMarkDown": "Git commit message used for the merge. Defaults to: Merging commit build $(buildName) $(buildNo)",
       "visibleRule": "mergeType = merge"
     }
   ],

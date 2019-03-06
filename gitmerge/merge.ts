@@ -10,6 +10,9 @@ var branchesToMergeStr = tl.getInput("branchesToTest", false);
 var targetBranch = tl.getInput("targetBranch", true);
 var sourceCommitId = tl.getInput("sourceCommitId", false);
 var remoteName = tl.getInput("remoteName", true);
+var gitUsername = tl.getInput("gitUsername",false);
+var gitEmail = tl.getInput("gitEmail",false);
+var gitCommitMessage = tl.getInput("gitCommitMessage",false);
 
 // ===================================================================================================
 // TODO: repoUrl could actually be determined as follows:
@@ -92,8 +95,15 @@ if (taskerror === false) { // skip actual task work to exit task
         tl.setResult(tl.TaskResult.Failed, "Unable to fetch remote branches");
     }
 
-    // Set the git user credentials to avoid errors
-    if (!ut.setGitCredentials("GitTask", "gittask@notused.com")){
+    if (!gitUsername || gitUsername.length === 0){
+      gitUsername = 'GitTask'
+    }
+
+    if (!gitEmail || gitEmail.length === 0){
+      gitEmail = 'gittask@notused.com';
+    }
+    // Set the git user credentials
+    if (!ut.setGitCredentials(gitUsername, gitEmail)){
         tl.setResult(tl.TaskResult.Failed, "Unable to set git config credentials");
     }
 
@@ -179,7 +189,10 @@ if (taskerror === false) { // skip actual task work to exit task
             var buildNo = tl.getVariable("Build.BuildNumber");
             var identifier = `build ${buildName} (${buildNo})`;
         }
-        var commitMessage = `Merging in ${identifier}`;
+        if (!gitCommitMessage || gitCommitMessage.length === 0){
+          gitCommitMessage = "Merging commit ";
+        }
+        var commitMessage = `${gitCommitMessage} ${identifier}`;
         // merge in the commit id and push
         if (ut.mergeCommit(sourceCommitId, commitMessage)) {
             if (!ut.push(remoteName, targetBranch)) {

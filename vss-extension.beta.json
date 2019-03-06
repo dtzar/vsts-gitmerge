@@ -1,8 +1,8 @@
 {
     "manifestVersion": 1,
-    "id": "git-merge-dev",
-    "name": "Git Merge Dev",
-    "version": "0.2.0",
+    "id": "git-merge-beta",
+    "name": "Git Merge Beta",
+    "version": "0.2.2",
     "publisher": "dtzar",
     "targets": [
         {
@@ -12,9 +12,15 @@
     "description": "Test merges for conflicts between git branches OR actual merge commit and push of two git branches",
     "categories": [
         "Azure Pipelines"
-    ],      
+    ],
+    "tags": [
+      "git",
+      "git merge",
+      "merge",
+      "merge conflicts"
+    ],
     "icons": {
-        "default": "images/icon.png"        
+        "default": "images/extension-icon.png"
     },
     "files": [
         {
@@ -58,13 +64,19 @@
     },
     "contributions": [
         {
-            "id": "git-merge-task",
+            "id": "git-merge-beta-task",
             "type": "ms.vss-distributed-task.task",
             "targets": [
                 "ms.vss-distributed-task.tasks"
             ],
             "properties": {
-                "name": "GitMerge"
+                "name": "GitMerge",
+                "iconAsset": "dtzar.git-merge-beta/images/extension-icon.png",
+                "_sharedData": {
+                    "assets": [
+                        "dtzar.git-merge-beta/images/extension-icon.png"
+                    ]
+                }
             }
         }
     ]

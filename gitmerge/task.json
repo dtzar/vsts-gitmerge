@@ -14,9 +14,9 @@
   "version": {
     "Major": "0",
     "Minor": "2",
-    "Patch": "2"
+    "Patch": "3"
   },
-  "minimumAgentVersion": "2.105.6",
+  "minimumAgentVersion": "2.147.0",
   "instanceNameFormat": "Git Merge Beta",
   "groups": [
     {

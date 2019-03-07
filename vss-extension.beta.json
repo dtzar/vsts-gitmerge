@@ -2,7 +2,7 @@
     "manifestVersion": 1,
     "id": "git-merge-beta",
     "name": "Git Merge Beta",
-    "version": "0.2.2",
+    "version": "0.2.3",
     "publisher": "dtzar",
     "targets": [
         {

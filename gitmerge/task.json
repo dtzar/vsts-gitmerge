@@ -1,7 +1,7 @@
 {
-  "id": "e927ed99-f19e-4c55-9e87-ccf0409b4689",
-  "name": "gitMerge",
-  "friendlyName": "Git Merge",
+  "id": "652d5578-e8ea-45dd-b6de-5cd40f527590",
+  "name": "gitMergeBeta",
+  "friendlyName": "Git Merge Beta",
   "description": "Test merges and optionally commit",
   "author": "David Tesar",
   "helpMarkDown": "",
@@ -13,11 +13,11 @@
   "demands": [],
   "version": {
     "Major": "0",
-    "Minor": "1",
-    "Patch": "12"
+    "Minor": "2",
+    "Patch": "3"
   },
-  "minimumAgentVersion": "2.105.6",
-  "instanceNameFormat": "Git Merge",
+  "minimumAgentVersion": "2.147.0",
+  "instanceNameFormat": "Git Merge Beta",
   "groups": [
     {
       "name": "advanced",
@@ -89,6 +89,33 @@
       "required": false,
       "helpMarkDown": "Personal Access Token for repo access. Only required if this task is used in a Release (not required in Builds). For builds, enable OAuth token.",
       "groupName": "advanced"
+    },
+    {
+      "name": "gitUsername",
+      "type": "string",
+      "label": "Git Commit User Name",
+      "defaultValue": "GitTask",
+      "required": false,
+      "helpMarkDown": "",
+      "visibleRule": "mergeType = merge"
+    },
+    {
+      "name": "gitEmail",
+      "type": "string",
+      "label": "Git Commit Email",
+      "defaultValue": "gittask@notused.com",
+      "required": false,
+      "helpMarkDown": "Git email used for commits",
+      "visibleRule": "mergeType = merge"
+    },
+    {
+      "name": "gitCommitMessage",
+      "type": "string",
+      "label": "Git Commit Message",
+      "defaultValue": "",
+      "required": false,
+      "helpMarkDown": "Git commit message used for the merge. Defaults to: Merging commit build $(buildName) $(buildNo)",
+      "visibleRule": "mergeType = merge"
     }
   ],
   "execution": {

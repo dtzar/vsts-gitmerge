@@ -26,10 +26,10 @@
   },
   "homepage": "https://marketplace.visualstudio.com/items?itemName=dtzar.git-merge",
   "devDependencies": {
-    "@types/node": "^10.12.18",
+    "@types/node": "^14",
     "process": "^0.11.10",
     "q": "^1.5.1",
-    "shelljs": "^0.8.3",
-    "azure-pipelines-task-lib": "^2.7.7"
+    "shelljs": "^0.8.4",
+    "azure-pipelines-task-lib": "^2.12.1"
   }
 }

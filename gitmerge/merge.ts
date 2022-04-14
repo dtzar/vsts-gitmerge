@@ -23,7 +23,8 @@ var repoUrl = tl.getInput("repoUrl", true);
 var pat = tl.getInput("pat", false);
 
 // get build vars
-var sourceBranch = tl.getVariable("Build.SourceBranchName");
+// should be Build.SourceBranch because that is the full branch name and will support sub folders.
+var sourceBranch = tl.getVariable("Build.SourceBranch");
 var buildSourceCommitId = tl.getVariable("Build.SourceVersion");
 var token = tl.getEndpointAuthorizationParameter("SystemVssConnection", "AccessToken", false);
 

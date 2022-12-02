@@ -2,6 +2,8 @@
 
 ## Overview
 
+> Note: This marketplace task is no longer published or being developed.  If interested to take this repository/task over, then please send me an email or contact me.
+
 This [Azure DevOps marketplace task](https://marketplace.visualstudio.com/items?itemName=dtzar.git-merge) does a test merge or actual merge and push of Azure DevOps git branches in the build or release areas.
 
 ## Modes
